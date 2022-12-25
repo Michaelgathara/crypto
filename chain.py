@@ -9,7 +9,7 @@ class Chain:
     
     def genGenesisBlock(self):
         genesisBlock: Block = Block(0, [], time.time(), "0")
-        genesisBlock.hash = genesisBlock.hashIt()
+        genesisBlock.backHash = genesisBlock.hashIt()
         self.chain.append(genesisBlock)
     
     @property
@@ -26,7 +26,7 @@ class Chain:
         return comHash
     
     def addBlock(self, block, proof) -> bool:
-        prevHash = self.prevBlock.hash
+        prevHash = self.previousBlock().backHash
         if prevHash != block.prevHash:
             return False
         if not self.validProof(block, proof):
@@ -45,11 +45,11 @@ class Chain:
         if not self.queuedTransactions:
             return False
         
-        previousBlock = self.previousBlock
+        previousBlock = self.previousBlock()
 
         newBlock = Block(previousBlock.index + 1, self.queuedTransactions, time.time(), previousBlock.hash)
 
-        proof = self.validProof(newBlock)
+        proof = self.workProof(newBlock)
         self.addBlock(newBlock, proof)
         self.queuedTransactions = []
         return newBlock.index
